@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: antt
+    schema: raw
+    tables:
+      - name: producao
+        description: SIADE, produção origem-destino. Uma linha do CSV da ANTT por registro, com o texto como veio.
+      - name: arquivos_carregados
+        description: Cada CSV anual e a data de modificação dele no CKAN da ANTT.
+  - name: infrasa
+    schema: raw
+    tables:
+      - name: patios
+        description: Pátios ferroviários declarados pelas concessionárias à ANTT, publicados pela InfraSA.

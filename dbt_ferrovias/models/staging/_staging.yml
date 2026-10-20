@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: stg_antt__producao
+    description: Produção origem-destino tipada. Cada linha é uma mercadoria transportada de uma estação a outra num mês.
+    columns:
+      - name: mes
+        description: Primeiro dia do mês de referência.
+        tests: [not_null]
+      - name: tu
+        description: Toneladas úteis, o peso da carga sem o vagão.
+        tests:
+          - not_null
+          - dbt_utils.accepted_range: {min_value: 0}
+      - name: tku
+        description: Toneladas úteis vezes os quilômetros percorridos.
+        tests:
+          - not_null
+          - dbt_utils.accepted_range: {min_value: 0}
+      - name: uf_origem
+        tests: [not_null]
+      - name: uf_destino
+        tests: [not_null]
+
+  - name: stg_infrasa__patios
+    description: Pátios com coordenada em WGS84 e o nome normalizado para casar com o SIADE.
+    columns:
+      - name: patio_id
+        tests: [unique, not_null]

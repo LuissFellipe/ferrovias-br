@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: int_producao__deduplicada
+    description: Produção sem as repetições idênticas que a ANTT publicou.
+  - name: int_estacoes__geolocalizadas
+    description: Cada estação do SIADE com a coordenada do pátio correspondente, quando ele existe.
+    columns:
+      - name: estacao_id
+        tests: [unique, not_null]

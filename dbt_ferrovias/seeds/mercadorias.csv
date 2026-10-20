@@ -1,0 +1,104 @@
+mercadoria_antt,grupo,perigosa
+Açúcar,Açúcar,false
+Adubo Fert em Geral acond - Perigoso,Fertilizantes,true
+Adubo Fert em Geral a Granel  - Perigoso,Fertilizantes,true
+Adubo Orgânico acondicionado,Fertilizantes,false
+Adubo Orgânico a Granel,Fertilizantes,false
+Álcool,Combustíveis,false
+Algodão,Grãos e farelos,false
+Alumínio,Outros,false
+Amônia,Fertilizantes,false
+Antracito,Carvão e coque,false
+Areia,Construção,false
+Argila,Construção,false
+Bauxita,Outros minerais,false
+Bebidas e Vasilhames,Outros,false
+Cal,Construção,false
+Calcário Britado,Construção,false
+Calcário Corretivo,Fertilizantes,false
+Calcário Siderúrgico,Siderurgia,false
+Carvão Mineral,Carvão e coque,false
+Celulose,Celulose e madeira,false
+Cimento acondicionado,Construção,false
+Cimento a Granel,Construção,false
+Clínquer,Construção,false
+Cloreto de Potássio,Fertilizantes,false
+Cobre,Outros minerais,false
+Contêiner cheio 53 pés,Contêiner,false
+Contêiner Cheio de 20 Pés,Contêiner,false
+Contêiner Cheio de 20 Pés - Perigoso,Contêiner,true
+Contêiner Cheio de 40 Pés,Contêiner,false
+Contêiner Cheio de 40 Pés - Perigoso,Contêiner,true
+Contêiner vazio 53 pés,Contêiner,false
+Contêiner Vazio de 20 Pés,Contêiner,false
+Contêiner Vazio de 40 Pés,Contêiner,false
+Coque,Carvão e coque,false
+Coque Metalúrgico,Carvão e coque,false
+Cromita,Outros minerais,false
+Demais Produtos,Outros,false
+Dolomita,Outros minerais,false
+Dormente de Concreto,Construção,false
+Dormentes de Madeira,Celulose e madeira,false
+Dunito,Outros minerais,false
+Enxofre,Fertilizantes,false
+Escória,Siderurgia,false
+Farelo de Milho,Grãos e farelos,false
+Farelo de Soja,Grãos e farelos,false
+Farinha de Trigo,Grãos e farelos,false
+Ferro Gusa,Siderurgia,false
+Fosfato,Fertilizantes,false
+Fosfato - Perigoso,Fertilizantes,true
+Gasolina,Combustíveis,false
+Gesso,Construção,false
+Grãos - arroz,Grãos e farelos,false
+Grãos - Cevada,Grãos e farelos,false
+Grãos - Malte,Grãos e farelos,false
+Grãos - Milho,Grãos e farelos,false
+Grãos - Trigo,Grãos e farelos,false
+Ilmenita,Outros minerais,false
+LAB - Sulfonato de alquilbenzeno linear,Combustíveis,false
+Ladrilhos e azulejos,Construção,false
+Madeira,Celulose e madeira,false
+Magnesita,Outros minerais,false
+Manganês,Outros minerais,false
+"Máquinas, Motores, Peças e acessórios",Outros,false
+Minério de Ferro,Minério de ferro,false
+Minério de Ferro Especial - MRS distancia menor 100 km,Minério de ferro,false
+Minério de Ferro SP - MRS destino SP,Minério de ferro,false
+Óleo Cru,Combustíveis,false
+Óleo Diesel,Combustíveis,false
+Óleo Vegetal,Grãos e farelos,false
+Outras - Carga Geral Não Conteinerizada,Outros,false
+Outras - C Geral Não Contein - Perigoso,Outros,true
+Outros - adubos e Fertilizantes,Fertilizantes,false
+Outros - adubos e Fertiliz - Perigoso,Fertilizantes,true
+Outros - Comb e derivado -  Perigoso,Combustíveis,true
+"Outros - Combust, deriv. Petro., alcool",Combustíveis,false
+Outros - extração Vegetal e Celulose,Celulose e madeira,false
+Outros Graneis Minerais,Outros minerais,false
+Outros - Indústria Cimenteira e Construção,Construção,false
+Outros - Produção agrícola,Grãos e farelos,false
+Pallets de Madeira,Celulose e madeira,false
+Papel,Celulose e madeira,false
+Pedras em Blocos e Placas,Construção,false
+Pellets Cítricos,Grãos e farelos,false
+Pó de Pedra,Construção,false
+Prd. Siderúrgicos - Bobina - BF,Siderurgia,false
+Prd. Siderúrgicos - Bobina - BQ,Siderurgia,false
+Prd. Siderúrgicos - Fio Máquina,Siderurgia,false
+Prd. Siderúrgicos - Outros,Siderurgia,false
+Prd. Siderúrgicos - Placa,Siderurgia,false
+Prd. Siderúrgicos - Tarugo,Siderurgia,false
+Prd. Siderúrgicos - Tubos,Siderurgia,false
+Prd. Siderúrgicos - Vergalhões,Siderurgia,false
+Produtos Petroquímicos,Combustíveis,false
+Produtos Químicos,Outros,false
+Produtos Químicos - Perigoso,Outros,true
+Sal,Outros minerais,false
+Soja,Grãos e farelos,false
+Sucata,Siderurgia,false
+Tijolos e Telhas,Construção,false
+Toras de Madeira,Celulose e madeira,false
+Toretes,Celulose e madeira,false
+Ureia,Fertilizantes,false
+Veículos,Outros,false

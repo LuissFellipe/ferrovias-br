@@ -1,0 +1,10 @@
+.env
+.venv/
+dbt_ferrovias/target/
+dbt_ferrovias/logs/
+dbt_ferrovias/dbt_packages/
+dbt_ferrovias/.user.yml
+__pycache__/
+.ipynb_checkpoints/
+site/data/
+site/dbt/

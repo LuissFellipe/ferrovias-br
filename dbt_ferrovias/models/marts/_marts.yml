@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: dim_estacoes
+    description: Estações que aparecem no SIADE, com coordenada quando o pátio foi encontrado.
+    columns:
+      - name: estacao_id
+        tests: [unique, not_null]
+
+  - name: dim_mercadorias
+    description: Mercadoria da ANTT e o grupo usado nas análises (seed mercadorias.csv).
+    columns:
+      - name: mercadoria_antt
+        tests: [unique, not_null]
+
+  - name: fct_producao_mensal
+    description: Um fluxo por mês, ferrovia, mercadoria, origem e destino.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [mes, ferrovia, mercadoria_antt, origem_id, destino_id]
+    columns:
+      - name: grupo
+        description: >
+          Nulo quando a ANTT publica uma mercadoria que não está no seed. O
+          teste para o pipeline até ela ser classificada.
+        tests: [not_null]
+
+  - name: fct_ferrovia_grupo_mensal
+    description: Toneladas por mês, ferrovia e grupo de mercadoria.
