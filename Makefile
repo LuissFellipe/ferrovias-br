@@ -15,7 +15,7 @@ transform:
 	cd dbt_ferrovias && uv run dbt deps --profiles-dir . && uv run dbt build --profiles-dir .
 
 export:
-	uv run python export/export_site.py
+	PYTHONPATH=ingest uv run python export/export_site.py
 
 pipeline: up ingest transform export
 

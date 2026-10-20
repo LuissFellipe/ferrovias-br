@@ -7,6 +7,12 @@ models:
       - name: estacao_id
         tests: [unique, not_null]
 
+  - name: dim_ferrovias
+    description: Concessionárias (seed ferrovias.csv). O SIADE só traz a sigla.
+    columns:
+      - name: ferrovia
+        tests: [unique, not_null]
+
   - name: dim_mercadorias
     description: Mercadoria da ANTT e o grupo usado nas análises (seed mercadorias.csv).
     columns:
@@ -19,6 +25,10 @@ models:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns: [mes, ferrovia, mercadoria_antt, origem_id, destino_id]
     columns:
+      - name: ferrovia
+        description: Concessionária responsável pelo fluxo, segundo o dicionário da ANTT. Um fluxo pode passar pela malha de outra.
+        tests:
+          - relationships: {to: ref('dim_ferrovias'), field: ferrovia}
       - name: grupo
         description: >
           Nulo quando a ANTT publica uma mercadoria que não está no seed. O
@@ -27,3 +37,9 @@ models:
 
   - name: fct_ferrovia_grupo_mensal
     description: Toneladas por mês, ferrovia e grupo de mercadoria.
+
+  - name: fct_fluxos_anuais
+    description: Fluxos somados por ano; é o que o mapa desenha.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [ano, ferrovia, mercadoria_antt, origem_id, destino_id]

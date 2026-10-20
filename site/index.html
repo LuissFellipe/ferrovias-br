@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Carga nas Ferrovias do Brasil</title>
+  <meta name="description" content="Toneladas transportadas pelas ferrovias concedidas, por estação de origem e destino, segundo a ANTT, desde 2006.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="mapa" aria-label="Mapa dos fluxos de carga entre estações ferroviárias"></div>
+
+  <aside id="painel">
+    <header>
+      <h1>Carga nas ferrovias do Brasil</h1>
+      <p class="sub">Produção origem-destino declarada à ANTT · <span id="atualizado">carregando…</span></p>
+    </header>
+
+    <section class="controles" aria-label="Filtros">
+      <div class="controles-topo">
+        <span class="rotulo">Filtros</span>
+        <button type="button" id="limpar" class="link" hidden>Limpar filtros</button>
+      </div>
+      <label class="largo">Ferrovia
+        <select id="ferrovia"></select>
+      </label>
+      <label>Ano
+        <select id="ano"></select>
+      </label>
+      <label>Carga
+        <select id="grupo"><option value="-1">Todas</option></select>
+      </label>
+      <label class="largo">Estação
+        <input id="estacao" type="search" list="lista-estacoes" placeholder="Buscar ou clicar no mapa…" autocomplete="off">
+        <datalist id="lista-estacoes"></datalist>
+      </label>
+    </section>
+
+    <p class="recorte"><span class="rotulo">Recorte</span> <strong id="recorte">–</strong></p>
+
+    <section class="cards">
+      <div class="card">
+        <span class="rotulo" id="rotulo-tu">Toneladas no ano</span>
+        <strong id="tu">–</strong>
+      </div>
+      <div class="card">
+        <span class="rotulo" id="rotulo-variacao">vs. ano anterior</span>
+        <strong id="variacao">–</strong>
+      </div>
+      <div class="card">
+        <span class="rotulo">Distância média</span>
+        <strong id="distancia">–</strong>
+      </div>
+      <div class="card">
+        <span class="rotulo">Minério de ferro</span>
+        <strong id="minerio">–</strong>
+      </div>
+    </section>
+
+    <section class="grafico">
+      <div class="grafico-topo">
+        <span class="rotulo" id="rotulo-serie">Toneladas por mês</span>
+        <span class="dica">clique para escolher o ano</span>
+      </div>
+      <svg id="serie" role="img" aria-label="Toneladas por mês desde 2006"></svg>
+    </section>
+
+    <section id="estacao-painel" class="estacao" hidden>
+      <div class="estacao-topo">
+        <h2 id="est-nome"></h2>
+        <button type="button" id="est-fechar" aria-label="Fechar estação">×</button>
+      </div>
+      <p id="est-resumo"></p>
+    </section>
+
+    <section class="grafico">
+      <span class="rotulo">Por tipo de carga <span class="dica">clique para filtrar</span></span>
+      <div id="composicao" class="barras-h" role="list"></div>
+    </section>
+
+    <section class="grafico">
+      <span class="rotulo">Maiores rotas</span>
+      <ol id="rotas" class="rotas"></ol>
+    </section>
+
+    <footer>
+      <div class="legenda-mapa" aria-label="Legenda do mapa">
+        <span class="rotulo">Cor do arco: carga que mais pesa na rota</span>
+        <ul id="legenda"></ul>
+      </div>
+      <p class="fonte">Dados: <a href="https://dados.antt.gov.br/dataset/sistema-de-acompanhamento-do-desempenho-operacional-das-concessionarias-siade" target="_blank" rel="noopener">ANTT / SIADE</a> e pátios ferroviários da <a href="https://geo.infrasa.gov.br/" target="_blank" rel="noopener">InfraSA</a>.
+        <a href="dbt/" target="_blank" rel="noopener">Documentação dos dados</a> ·
+        <a href="https://github.com/LuissFellipe/ferrovias-br" target="_blank" rel="noopener">Código do pipeline</a></p>
+    </footer>
+  </aside>
+
+  <div id="tooltip" hidden></div>
+
+  <script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
+  <script src="https://unpkg.com/deck.gl@9.1.14/dist.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
