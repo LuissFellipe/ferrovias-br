@@ -1,0 +1,61 @@
+name: Atualizar painel
+
+# A ANTT publica o SIADE uma vez por mês, com uns dois meses de atraso.
+# Uma execução por semana pega o mês novo sem baixar 21 CSVs todo dia.
+on:
+  schedule:
+    - cron: "0 12 * * 1"
+  workflow_dispatch:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: ferrovias
+          POSTGRES_PASSWORD: ferrovias
+          POSTGRES_DB: ferrovias
+        ports:
+          - 5436:5432
+        options: >-
+          --health-cmd "pg_isready -U ferrovias"
+          --health-interval 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      # O banco nasce vazio a cada execução: a carga é sempre a histórica
+      # inteira, e o resultado não depende de estado guardado em lugar nenhum.
+      - run: make ingest
+      - run: make transform
+      - run: make export
+      - run: make docs
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  publicar:
+    needs: pipeline
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

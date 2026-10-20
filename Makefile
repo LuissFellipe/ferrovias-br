@@ -1,5 +1,9 @@
 .PHONY: up ingest patios producao transform export docs site analise pipeline down
 
+# As etapas dependem uma da outra pela ordem, não por arquivos: com make -j o
+# transform rodaria antes de a ingestão terminar.
+.NOTPARALLEL:
+
 up:
 	docker compose up -d --wait
 

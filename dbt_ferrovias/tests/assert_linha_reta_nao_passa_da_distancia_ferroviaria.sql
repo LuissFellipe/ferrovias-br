@@ -1,8 +1,8 @@
 -- Prova física da geolocalização: entre dois pontos, o trilho nunca é mais
 -- curto que a linha reta. Uma estação posta no pátio errado aparece aqui
--- como rota "impossível". Hoje 5 das 3.848 rotas passam da tolerância, com
--- menos de 0,01% da carga: a distância informada parece ser só o trecho da
--- própria concessionária. O teste falha se esse resíduo passar de 0,1%.
+-- como rota "impossível". Hoje 5 rotas passam da tolerância, com 0,0006% da
+-- carga: a distância informada parece ser só o trecho da própria
+-- concessionária. O teste falha se esse resíduo passar de 0,1%.
 with rotas as (
     select
         f.origem_id,
