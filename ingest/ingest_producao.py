@@ -56,9 +56,11 @@ COLUNAS = [
 ]
 
 
-def requisitar(url, tentativas=5, **kwargs):
-    # O portal da ANTT derruba conexões com frequência; quase sempre a segunda
-    # tentativa passa.
+def requisitar(url, tentativas=8, **kwargs):
+    # O portal da ANTT derruba conexões com frequência, e às vezes passa
+    # minutos sem responder: em 21/10/2026 o GitHub Actions esgotou 5
+    # tentativas com esperas de 2 a 16 s no CSV de 2012. A espera agora
+    # cresce até 2 minutos.
     for tentativa in range(1, tentativas + 1):
         try:
             resp = requests.get(url, timeout=120, **kwargs)
@@ -67,7 +69,7 @@ def requisitar(url, tentativas=5, **kwargs):
         except requests.RequestException as erro:
             if tentativa == tentativas:
                 raise
-            espera = 2 ** tentativa
+            espera = min(2 ** (tentativa + 1), 120)
             print(f"falha na ANTT ({erro.__class__.__name__}), nova tentativa em {espera}s")
             time.sleep(espera)
 

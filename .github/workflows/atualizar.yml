@@ -21,7 +21,9 @@ concurrency:
 jobs:
   pipeline:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # A ANTT às vezes fica minutos sem responder, e o Comex Stat limita a
+    # frequência de consultas: a carga do zero leva de 10 a 20 minutos.
+    timeout-minutes: 45
     services:
       postgres:
         image: postgis/postgis:16-3.4
