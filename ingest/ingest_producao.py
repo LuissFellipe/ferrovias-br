@@ -5,6 +5,13 @@ ano corrente é substituído a cada mês fechado, então a API do CKAN informa a
 data de modificação de cada recurso e um arquivo só é baixado de novo quando
 ela muda. O raw guarda o texto como veio: a conversão de número e data fica
 no dbt, onde ela pode ser testada.
+
+No GitHub Actions o banco nasce vazio, e baixar os 21 CSVs do portal da ANTT
+levava cerca de 9 minutos. Cada CSV baixado fica guardado em ingest/.cache/,
+com a data de modificação do CKAN no nome, e o workflow preserva essa pasta
+entre execuções. Um arquivo só vem do cache se o CKAN ainda informa a mesma
+data; em 02/10/2026 a ANTT republicou os 21 anos de uma vez, e uma cópia fixa
+teria ficado desatualizada sem aviso.
 """
 
 import csv
@@ -12,12 +19,14 @@ import io
 import json
 import re
 import time
+from pathlib import Path
 
 import requests
 
 from db import conectar
 
 CKAN = "https://dados.antt.gov.br/api/3/action/package_show"
+CACHE = Path(__file__).resolve().parent / ".cache"
 CONJUNTO = "sistema-de-acompanhamento-do-desempenho-operacional-das-concessionarias-siade"
 ANO_INICIAL = 2006
 CABECALHO = [
@@ -111,9 +120,24 @@ def ler(conteudo, nome):
         yield (nome, i, *(c.strip() for c in linha))
 
 
+def baixar(arquivo):
+    versao = re.sub(r"[^0-9A-Za-z]", "", arquivo["modificado"])
+    guardado = CACHE / f"{arquivo['nome']}.{versao}"
+    if guardado.exists():
+        return guardado.read_bytes()
+    conteudo = requisitar(arquivo["url"]).content
+    CACHE.mkdir(exist_ok=True)
+    # Sai a versão anterior do mesmo arquivo, para o cache não crescer a cada
+    # republicação.
+    for antigo in CACHE.glob(f"{arquivo['nome']}.*"):
+        antigo.unlink()
+    guardado.write_bytes(conteudo)
+    return conteudo
+
+
 def carregar(conn, arquivo):
     nome = arquivo["nome"]
-    linhas = list(ler(requisitar(arquivo["url"]).content, nome))
+    linhas = list(ler(baixar(arquivo), nome))
     with conn.transaction():
         # O arquivo substitui por inteiro o que ele mesmo carregou antes: uma
         # revisão da ANTT num mês passado também chega aqui.

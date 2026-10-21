@@ -41,6 +41,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
       - run: uv sync --frozen
+      # Os CSVs da ANTT baixados nas execuções anteriores. A ingestão só usa um
+      # arquivo do cache se o CKAN ainda informa a mesma data de modificação.
+      - uses: actions/cache@v4
+        with:
+          path: ingest/.cache
+          key: antt-${{ github.run_id }}
+          restore-keys: antt-
       # O banco nasce vazio a cada execução: a carga é sempre a histórica
       # inteira, e o resultado não depende de estado guardado em lugar nenhum.
       - run: make ingest
