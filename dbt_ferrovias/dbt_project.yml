@@ -31,3 +31,15 @@ seeds:
         lat: double precision
         lon: double precision
         fonte: text
+    produtos_exportacao:
+      +column_types:
+        sh4: text
+    portos:
+      +column_types:
+        urf: text
+        lat: double precision
+        lon: double precision
+        raio_km: double precision
+    ufs_comex:
+      +column_types:
+        uf: text

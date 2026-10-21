@@ -1,4 +1,4 @@
-.PHONY: up ingest patios producao transform export docs site analise pipeline down
+.PHONY: up ingest patios producao comex transform export docs site analise pipeline down
 
 # As etapas dependem uma da outra pela ordem, não por arquivos: com make -j o
 # transform rodaria antes de a ingestão terminar.
@@ -13,7 +13,10 @@ patios:
 producao:
 	uv run python ingest/ingest_producao.py
 
-ingest: patios producao
+comex:
+	uv run python ingest/ingest_comex.py
+
+ingest: patios producao comex
 
 transform:
 	cd dbt_ferrovias && uv run dbt deps --profiles-dir . && uv run dbt build --profiles-dir .

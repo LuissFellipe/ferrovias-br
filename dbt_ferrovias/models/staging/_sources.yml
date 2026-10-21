@@ -13,3 +13,8 @@ sources:
     tables:
       - name: patios
         description: Pátios ferroviários declarados pelas concessionárias à ANTT, publicados pela InfraSA.
+  - name: comex
+    schema: raw
+    tables:
+      - name: comex_exportacao
+        description: Exportação mensal em kg por UF do produto, URF de despacho e posição SH4 (API do Comex Stat).

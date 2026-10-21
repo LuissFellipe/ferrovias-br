@@ -27,3 +27,15 @@ models:
     columns:
       - name: patio_id
         tests: [unique, not_null]
+
+  - name: stg_comex__exportacao
+    description: Exportação mensal em toneladas, com a UF do produto em sigla.
+    columns:
+      - name: uf_nome
+        description: Nome que o Comex Stat usa. Um nome novo que não esteja em ufs_comex para o pipeline.
+        tests:
+          - relationships: {to: ref('ufs_comex'), field: nome}
+      - name: toneladas
+        tests:
+          - not_null
+          - dbt_utils.accepted_range: {min_value: 0}

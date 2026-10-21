@@ -14,7 +14,8 @@ Projeto independente, feito com dados públicos e sem vínculo com a MRS ou com 
 
 ```
 ANTT, SIADE (CKAN, 21 CSVs anuais) ─► ingest_producao.py ─┐
-InfraSA, pátios ferroviários (ArcGIS) ─► ingest_patios.py ─┴─► PostGIS (raw) ─► dbt ─► export_site.py ─► painel estático
+InfraSA, pátios ferroviários (ArcGIS) ─► ingest_patios.py ─┤
+Comex Stat, exportação (API) ─────────► ingest_comex.py ───┴─► PostGIS (raw) ─► dbt ─► export_site.py ─► painel estático
                                                                        staging            JSON           MapLibre + deck.gl
                                                                        intermediate                      (GitHub Pages)
                                                                        marts ─► notebooks de análise
@@ -26,12 +27,14 @@ InfraSA, pátios ferroviários (ArcGIS) ─► ingest_patios.py ─┴─► Pos
 | raw | `raw.producao` | Uma linha do CSV da ANTT por registro, com o texto como veio |
 | raw | `raw.patios` | 2.110 pátios declarados pelas concessionárias, com coordenada |
 | raw | `raw.arquivos_carregados` | Cada CSV e a data de modificação dele no CKAN |
+| raw | `raw.comex_exportacao` | Exportação mensal por UF do produto, porto (URF) e posição SH4 |
 | staging | `stg_antt__producao`, `stg_infrasa__patios` | Data, número no padrão brasileiro e nome de estação normalizado |
 | intermediate | `int_producao__deduplicada` | Sem as repetições idênticas publicadas pela ANTT |
 | intermediate | `int_estacoes__geolocalizadas` | Cada estação do SIADE com o pátio correspondente |
 | marts | `dim_estacoes`, `dim_ferrovias`, `dim_mercadorias` | Estação com coordenada, concessionária e mercadoria com grupo |
 | marts | `fct_producao_mensal` | Um fluxo por mês, ferrovia, mercadoria, origem e destino |
 | marts | `fct_fluxos_anuais`, `fct_ferrovia_grupo_mensal` | Agregados que o painel e os notebooks leem |
+| marts | `fct_porto_produto_mensal`, `fct_porto_produto_uf_anual` | Exportação por porto e produto contra o que chegou de trem ao porto |
 
 ## O que os dados mostram
 
@@ -46,6 +49,40 @@ InfraSA, pátios ferroviários (ArcGIS) ─► ingest_patios.py ─┴─► Pos
 
 A análise completa está em [`analises/02_mrs.ipynb`](analises/02_mrs.ipynb), e a investigação da fonte em [`analises/01_reconhecimento.ipynb`](analises/01_reconhecimento.ipynb).
 
+## Carga para Santos fora do trilho: perguntas de negócio
+
+**Para quem:** a área comercial e de planejamento de uma ferrovia que chega a Santos.
+
+**Como:** para açúcar, soja, farelo de soja, milho e celulose, o pipeline compara o que o Porto de Santos exportou (Comex Stat) com o que chegou de trem às estações a até 30 km do porto (SIADE, de qualquer concessionária). A diferença é a carga que chegou por outro meio, que para esses produtos em Santos é, na prática, caminhão. A análise completa, com gráficos, está em [`analises/03_carga_fora_do_trilho.ipynb`](analises/03_carga_fora_do_trilho.ipynb).
+
+**1. Quanto das exportações por Santos chega de trem?**
+Em 2025, das 92,4 mi t exportadas nesses cinco produtos, 61,4 mi t chegaram de trem (66%) e **31,0 mi t chegaram por fora do trilho**. Quase tudo está em dois produtos: soja (12,6 mi t) e açúcar (11,6 mi t). No açúcar, só 51% chega de trem.
+
+| produto (2025) | exportado | de trem | fora do trilho | % de trem |
+|---|---|---|---|---|
+| Soja | 34,6 mi t | 21,9 mi t | 12,6 mi t | 63% |
+| Açúcar | 23,5 mi t | 11,9 mi t | 11,6 mi t | 51% |
+| Milho | 14,7 mi t | 11,9 mi t | 2,8 mi t | 81% |
+| Farelo de soja | 10,0 mi t | 7,4 mi t | 2,6 mi t | 74% |
+| Celulose | 9,7 mi t | 8,3 mi t | 1,4 mi t | 86% |
+
+**2. A fatia do trem está crescendo?**
+Sim, mas não o bastante para diminuir a carga fora do trilho. De 2015 a 2025, a exportação por Santos cresceu 80% (51,2 → 92,4 mi t) e o trem cresceu 111% (29,1 → 61,4 mi t), passando de 57% para 66% do total. Mesmo assim, o que chega por fora do trilho subiu de 22,0 para 31,0 mi t, com pico de 36,2 mi t em 2023. A celulose foi de 67% para 86% de trem; o açúcar ficou entre 46% e 59% nos 11 anos, sem tendência.
+
+**3. A carga escapa o ano todo ou só no pico da safra?**
+Depende do produto, e essa diferença decide o que fazer:
+- **Grãos: falta capacidade no pico.** O trem entrega de 2,8 a 3,8 mi t de grãos por mês de fevereiro a dezembro, enquanto a exportação vai de 2,4 mi t (janeiro) a 6,3 mi t (março). O trilho fica plano e o excesso da safra vai de caminhão. Em julho, o trem troca soja (0,8 mi t) por milho (1,7 mi t) sem aumentar o total. O melhor mês do trem foi de 1,8 mi t em 2015 para 4,2 mi t em 2025, e o pico da exportação foi de 4,2 para 7,1 mi t: a capacidade cresce, mas o pico cresce junto.
+- **Açúcar: não é capacidade.** A parcela do trem fica perto de 50% na safra e fora dela, e cai para 34% a 37% em fevereiro e março, na entressafra. O caminho para o açúcar é comercial: preço, terminais e acesso das usinas ao trilho.
+
+**4. De onde vem a carga que vai fora do trilho?**
+Em 2025, os maiores volumes são: açúcar de São Paulo (7,9 mi t: 17,1 exportadas e 9,1 de trem), soja de Goiás (6,3 mi t) e soja de Mato Grosso (4,2 mi t). É aproximado: no Comex Stat a UF é a de produção, e no SIADE é a da estação onde a carga embarcou. Soja de Goiás que vai de caminhão até um terminal em Minas conta como exportação de GO e trilho de MG. No açúcar de São Paulo, produção e embarque ficam no mesmo estado, e a distorção é pequena.
+
+**5. Quem leva até Santos a carga que vai de trem?**
+Em 2025, a MRS responde por **24% do açúcar** e **40% da celulose** que chegam de trem, e por 6% da soja e 7% do milho. A Rumo Malha Norte lidera em grãos e celulose, e a FCA no açúcar (47%). A coluna `ferrovia` do SIADE é a concessionária responsável pelo fluxo, não quem opera cada trecho.
+
+**6. Quanto isso representa?**
+As 31,0 mi t fora do trilho são cerca de **840 mil viagens de caminhão por ano**, considerando 37 t por viagem, a carga de um bitrem graneleiro (uma suposição, não um dado). Pela distância média que o trem já percorre até Santos em cada produto, seriam cerca de **33 bilhões de TKU**; a MRS inteira produziu 71,7 bilhões em 2025. É um teto, não uma previsão: parte dessa carga vem de perto do porto, onde o caminhão é mais competitivo.
+
 ## Decisões técnicas
 
 - **Coordenadas dos pátios oficiais, não do OpenStreetMap.** O SIADE identifica a estação só por nome e UF. O OSM cobria 18% da tonelagem da MRS e casava nomes errados ("Floriano" com Marechal Floriano, no ES). A camada de pátios declarados à ANTT, publicada pela InfraSA, casa 524 das 533 estações pelo nome. Com uma correção manual, cobre 99,97% da carga, incluindo todas as estações da MRS.
@@ -57,6 +94,9 @@ A análise completa está em [`analises/02_mrs.ipynb`](analises/02_mrs.ipynb), e
 - **Mercadoria nova precisa ser classificada.** Uma mercadoria que não está em `seeds/mercadorias.csv` fica com o grupo nulo, e um teste para o pipeline até ela ser classificada.
 - **"Ferrovia" é a concessionária responsável, não o trilho.** O dicionário da ANTT define assim, e por isso aparecem na conta da MRS fluxos de Pederneiras e Votuporanga para Santos, que rodam em malha de outra concessionária.
 - **O ano em andamento é comparado com os mesmos meses do ano anterior.** Em 2026, o painel compara jan–ago com jan–ago de 2025, e não com o ano de 2025 inteiro.
+- **Comex Stat pela API, com o certificado verificado.** Os arquivos em lote do Comex Stat estão num servidor com o certificado vencido desde 03/10/2026 (e sem o intermediário na cadeia). A API, em outro domínio, tem certificado válido e entrega o mesmo dado agregado por UF, porto e posição SH4. Ela limita a frequência de consultas e continua respondendo 429 por bem mais que os 10 s que a mensagem pede, então a ingestão espera entre um ano e outro e tenta de novo com intervalo crescente.
+- **Chegada ao porto pelo raio, não por lista de estações.** Conta como chegada a Santos todo fluxo que termina numa estação a até 30 km do porto (`seeds/portos.csv`). Um terminal novo que a ANTT passe a informar entra sozinho.
+- **Trem e exportação têm de conversar.** Num ano inteiro, o trem não pode trazer mais que 110% do que o porto exportou do mesmo produto; o máximo medido foi o milho em 2021 (102%), ano de safrinha frustrada. A primeira versão do mart partia da exportação e juntava o trilho depois, então um trilho sem exportação correspondente sumia sem erro. Uma sabotagem pegou isso: mapeei a soja do SIADE para uma posição SH4 que não tinha sido baixada, e o teste passou. Com um full join, o trilho sem exportação aparece com exportação zero, e a mesma sabotagem faz o teste falhar.
 - **Notebooks só leem os marts.** Nenhuma regra de limpeza mora nos notebooks, então o número deles é o mesmo do painel.
 
 ## Achado de qualidade de dados
@@ -80,5 +120,6 @@ Outros alvos: `make ingest`, `make transform`, `make export`, `make docs` e `mak
 ## Fontes
 
 - Produção origem-destino: [ANTT, SIADE](https://dados.antt.gov.br/dataset/sistema-de-acompanhamento-do-desempenho-operacional-das-concessionarias-siade)
+- Exportação por UF, porto e mercadoria: [Comex Stat, MDIC](https://comexstat.mdic.gov.br/) (API `api-comexstat.mdic.gov.br`)
 - Pátios ferroviários: [InfraSA](https://geo.infrasa.gov.br/server/rest/services/P%C3%A1tio_Ferrovi%C3%A1rio/MapServer)
 - Mapa base: © [CARTO](https://carto.com/), © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors

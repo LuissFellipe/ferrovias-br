@@ -1,0 +1,24 @@
+version: 2
+
+seeds:
+  - name: produtos_exportacao
+    description: >
+      Mercadoria do SIADE e a posição SH4 do Comex Stat que corresponde a
+      ela. A ingestão do Comex Stat lê este arquivo para saber o que baixar.
+    columns:
+      - name: sh4
+        tests: [unique, not_null]
+      - name: mercadoria_antt
+        tests:
+          - relationships: {to: ref('dim_mercadorias'), field: mercadoria_antt}
+  - name: portos
+    description: >
+      Porto, código da URF que o despacha no Comex Stat e o raio em volta dele
+      dentro do qual uma estação ferroviária conta como chegada ao porto.
+  - name: ufs_comex
+    description: >
+      Nome de UF que o Comex Stat usa e a sigla. As linhas sem sigla (bordo,
+      reexportação, não declarada) não são estados.
+    columns:
+      - name: nome
+        tests: [unique, not_null]

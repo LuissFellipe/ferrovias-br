@@ -43,3 +43,18 @@ models:
     tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns: [ano, ferrovia, mercadoria_antt, origem_id, destino_id]
+
+  - name: fct_porto_produto_mensal
+    description: Exportação por porto, produto e mês contra o que chegou de trem ao porto.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [mes, porto, produto]
+    columns:
+      - name: fora_do_trilho_t
+        description: Exportado menos o que chegou de trem. Negativo num mês quando a carga do trem ficou estocada para embarcar no mês seguinte.
+
+  - name: fct_porto_produto_uf_anual
+    description: A mesma conta por estado e ano, aproximada (UF de produção no Comex Stat, UF da estação de embarque no SIADE).
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [ano, porto, produto, uf]
