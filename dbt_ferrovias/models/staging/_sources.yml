@@ -8,6 +8,14 @@ sources:
         description: SIADE, produção origem-destino. Uma linha do CSV da ANTT por registro, com o texto como veio.
       - name: arquivos_carregados
         description: Cada CSV anual e a data de modificação dele no CKAN da ANTT.
+      - name: acidentes
+        description: RAAF, um acidente por linha, com o texto como veio. Sem a coluna Equipagem (nome do maquinista), que a ingestão descarta.
+      - name: acidentes_arquivos
+        description: O arquivo vigente de cada série de acidentes, o período que o nome dele declara e o formato de data detectado na carga.
+      - name: indice_acidentes
+        description: Índice oficial de acidentes por milhão de trem·km, por concessionária e ano.
+      - name: indice_acidentes_arquivos
+        description: Cada arquivo do índice e o último ano que o nome dele promete.
   - name: infrasa
     schema: raw
     tables:

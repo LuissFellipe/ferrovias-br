@@ -58,3 +58,28 @@ models:
     tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns: [ano, porto, produto, uf]
+
+  - name: fct_acidentes
+    description: Um acidente ferroviário por linha (RAAF/ANTT, 2004 em diante), sem dado pessoal.
+    columns:
+      - name: acidente_id
+        tests: [unique, not_null]
+      - name: registro_completo
+        description: >
+          Falso antes de 2011. Até 2009 todo acidente do arquivo é grave e o
+          país inteiro soma um óbito em seis anos, com 130 a 190
+          atropelamentos por ano: os não graves e as mortes não eram
+          registrados. Contagem antes de 2011 não se compara com depois.
+      - name: taxonomia_causa
+        description: Período da classificação de causas. Não compare causa entre os dois.
+
+  - name: fct_acidentes_ferrovia_anual
+    description: Acidentes, graves, óbitos e acidentes por bilhão de TKU, por ferrovia e ano, com o índice oficial da ANTT ao lado.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [ferrovia, ano]
+    columns:
+      - name: acidentes_por_bilhao_tku
+        description: Métrica deste projeto, não da ANTT. Nula quando a ferrovia não declarou carga no ano.
+      - name: indice_oficial
+        description: Acidentes por milhão de trem·km publicado pela ANTT. Nulo depois de 2019, porque o arquivo até 2025 saiu vazio.

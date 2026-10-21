@@ -39,3 +39,50 @@ models:
         tests:
           - not_null
           - dbt_utils.accepted_range: {min_value: 0}
+
+  - name: stg_antt__acidentes
+    description: Acidentes ferroviários tipados, com a data corrigida e a natureza dos dois layouts na mesma lista.
+    columns:
+      - name: acidente_id
+        tests: [unique, not_null]
+      - name: data_ocorrencia
+        tests: [not_null]
+      - name: ferrovia
+        tests:
+          - relationships: {to: ref('ferrovias'), field: sigla}
+      - name: natureza
+        description: Natureza básica. Uma natureza nova na ANTT para o pipeline até entrar nesta lista.
+        tests:
+          - accepted_values:
+              values: [Descarrilamento, Atropelamento, Abalroamento, Colisão, Incêndio, Explosão, Não informada]
+      - name: causa_direta
+        description: >
+          A classificação mudou em dezembro de 2020: "Casos fortuitos ou de
+          força maior" cai de 30% para 3% dos acidentes e "Interferência de
+          terceiro" sobe de 21% para 74%. Comparar causa entre os dois
+          períodos mede a troca de classificação, não a ferrovia.
+        tests:
+          - accepted_values:
+              values:
+                - Interferência de Terceiro
+                - Via Permanente
+                - Casos Fortuitos ou de Força Maior
+                - Material Rodante
+                - Falha Humana
+                - Outras Causas
+                - Atos de vandalismo
+                - Sinalização, Telecomunicações e Eletrotécnica
+                - Infraestrutura
+                - Gestão
+                - Sistemas
+                - Não informada
+      - name: obitos
+        tests: [not_null, dbt_utils.accepted_range: {min_value: 0}]
+      - name: feridos
+        tests: [not_null, dbt_utils.accepted_range: {min_value: 0}]
+
+  - name: stg_antt__indice_acidentes
+    description: Índice oficial de acidentes por milhão de trem·km. O dado aberto vai até 2019.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [ferrovia, ano]

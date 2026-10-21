@@ -10,3 +10,13 @@ models:
         tests: [unique, not_null]
   - name: int_trilho__chegadas_porto
     description: Fluxos ferroviários que terminam numa estação dentro do raio de um porto, nas mercadorias de exportação.
+  - name: int_acidentes__deduplicados
+    description: Acidentes sem os registros repetidos do arquivo de 2004 a 2020.
+    columns:
+      - name: acidente_id
+        tests: [unique, not_null]
+  - name: int_acidentes__geolocalizados
+    description: Cada acidente com o ponto do pátio da estação anterior ou posterior.
+    columns:
+      - name: acidente_id
+        tests: [unique, not_null]
