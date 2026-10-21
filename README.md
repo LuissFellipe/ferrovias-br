@@ -1,12 +1,12 @@
 # Carga nas Ferrovias do Brasil
 
-Pipeline ELT que coleta a **produção ferroviária por origem e destino** que as concessionárias declaram à ANTT, de 2006 até hoje. Ele localiza cada estação no mapa, transforma os dados com dbt e publica um **painel de fluxos** no GitHub Pages. O foco é a **MRS Logística**.
+Pipeline ELT que coleta a **produção ferroviária por origem e destino** e os **acidentes ferroviários** que as concessionárias declaram à ANTT. Ele localiza cada estação no mapa, transforma os dados com dbt e publica um **painel de fluxos** e um **painel de acidentes** no GitHub Pages. O foco é a **MRS Logística**.
 
-**🚆 Painel:** https://luissfellipe.github.io/ferrovias-br/ · **📚 Documentação do dbt:** https://luissfellipe.github.io/ferrovias-br/dbt/
+**🚆 Carga:** https://luissfellipe.github.io/ferrovias-br/ · **⚠️ Acidentes:** https://luissfellipe.github.io/ferrovias-br/seguranca.html · **📚 Documentação do dbt:** https://luissfellipe.github.io/ferrovias-br/dbt/
 
 ![Painel com os fluxos da MRS em 2025](docs/painel.png)
 
-**Pergunta:** o que as ferrovias transportam, de onde para onde, e como isso mudou em 20 anos?
+**Perguntas:** o que as ferrovias transportam, de onde para onde, e como isso mudou em 20 anos? Onde e como acontecem os acidentes, e quem eles atingem?
 
 Projeto independente, feito com dados públicos e sem vínculo com a MRS ou com a ANTT.
 
@@ -15,7 +15,8 @@ Projeto independente, feito com dados públicos e sem vínculo com a MRS ou com 
 ```
 ANTT, SIADE (CKAN, 21 CSVs anuais) ─► ingest_producao.py ─┐
 InfraSA, pátios ferroviários (ArcGIS) ─► ingest_patios.py ─┤
-Comex Stat, exportação (API) ─────────► ingest_comex.py ───┴─► PostGIS (raw) ─► dbt ─► export_site.py ─► painel estático
+Comex Stat, exportação (API) ─────────► ingest_comex.py ───┤
+ANTT, RAAF (CKAN, acidentes) ─────────► ingest_acidentes.py ┴─► PostGIS (raw) ─► dbt ─► export_*.py ─► painel estático
                                                                        staging            JSON           MapLibre + deck.gl
                                                                        intermediate                      (GitHub Pages)
                                                                        marts ─► notebooks de análise
@@ -28,13 +29,18 @@ Comex Stat, exportação (API) ─────────► ingest_comex.py �
 | raw | `raw.patios` | 2.110 pátios declarados pelas concessionárias, com coordenada |
 | raw | `raw.arquivos_carregados` | Cada CSV e a data de modificação dele no CKAN |
 | raw | `raw.comex_exportacao` | Exportação mensal por UF do produto, porto (URF) e posição SH4 |
+| raw | `raw.acidentes`, `raw.indice_acidentes` | Acidentes como vieram, sem a coluna com o nome do maquinista, e o índice oficial |
+| raw | `raw.acidentes_arquivos` | O arquivo vigente de cada série, o período que ele declara e o formato de data detectado |
 | staging | `stg_antt__producao`, `stg_infrasa__patios` | Data, número no padrão brasileiro e nome de estação normalizado |
+| staging | `stg_antt__acidentes`, `stg_antt__indice_acidentes` | Data no formato de cada arquivo e natureza dos dois layouts na mesma lista |
 | intermediate | `int_producao__deduplicada` | Sem as repetições idênticas publicadas pela ANTT |
 | intermediate | `int_estacoes__geolocalizadas` | Cada estação do SIADE com o pátio correspondente |
+| intermediate | `int_acidentes__deduplicados`, `int_acidentes__geolocalizados` | Sem os registros repetidos, e com o pátio da estação anterior ao acidente |
 | marts | `dim_estacoes`, `dim_ferrovias`, `dim_mercadorias` | Estação com coordenada, concessionária e mercadoria com grupo |
 | marts | `fct_producao_mensal` | Um fluxo por mês, ferrovia, mercadoria, origem e destino |
 | marts | `fct_fluxos_anuais`, `fct_ferrovia_grupo_mensal` | Agregados que o painel e os notebooks leem |
 | marts | `fct_porto_produto_mensal`, `fct_porto_produto_uf_anual` | Exportação por porto e produto contra o que chegou de trem ao porto |
+| marts | `fct_acidentes`, `fct_acidentes_ferrovia_anual` | Um acidente por linha, e acidentes, óbitos e graves por bilhão de TKU por ferrovia e ano |
 
 ## O que os dados mostram
 
@@ -83,6 +89,26 @@ Em 2025, a MRS responde por **24% do açúcar** e **40% da celulose** que chegam
 **6. Quanto isso representa?**
 As 31,0 mi t fora do trilho são cerca de **840 mil viagens de caminhão por ano**, considerando 37 t por viagem, a carga de um bitrem graneleiro (uma suposição, não um dado). Pela distância média que o trem já percorre até Santos em cada produto, seriam cerca de **33 bilhões de TKU**; a MRS inteira produziu 71,7 bilhões em 2025. É um teto, não uma previsão: parte dessa carga vem de perto do porto, onde o caminhão é mais competitivo.
 
+## Segurança: onde e como acontecem os acidentes da MRS
+
+![Painel de acidentes da MRS, 2011 a 2025](docs/seguranca.png)
+
+**Para quem:** a área de segurança operacional e de relação com as comunidades de uma ferrovia que atravessa cidades.
+
+**Como:** os acidentes que as concessionárias declaram à ANTT (RAAF, 2004 a jan/2026), com o ponto do pátio da estação anterior ao acidente, contra a carga do SIADE dos mesmos meses. A análise completa está em [`analises/04_seguranca.ipynb`](analises/04_seguranca.ipynb).
+
+**1. Dá para comparar um ano com outro?** Só a partir de 2011. De 2004 a 2009, todo registro é grave e o país inteiro soma 1 óbito em seis anos, com 127 a 189 atropelamentos por ano: os acidentes não graves e as mortes não eram registrados. Em 2011 são 1.028 registros e 117 óbitos. Quem olhar a contagem desde 2004 vai ver os acidentes "triplicarem", e o que mudou foi o registro.
+
+**2. Como a MRS se compara?** De 2011 a 2025, a MRS tem 0,91 acidente grave por bilhão de TKU. A EFVM, com o mesmo TKU no período (930 bilhões), tem 0,19: a MRS registra 4,7 vezes mais acidentes graves (844 contra 180). Em mortes, **a MRS é a primeira do país: 531 óbitos**, contra 317 na Rumo Malha Sul e 260 na Rumo Malha Paulista.
+
+**3. Que tipo de acidente mata?** Atropelamento: **59% dos acidentes e 92% dos óbitos** (490 de 531). Os descarrilamentos foram 111 em 15 anos, **sem nenhuma morte**. O problema de segurança da MRS não está no trilho, e sim na faixa de domínio dentro das cidades.
+
+**4. Onde?** **Juiz de Fora concentra 104 óbitos de 2011 a 2025, ou 19,6% das mortes da MRS**, em 221 acidentes. O segundo município, Três Rios, tem 22. Dentro de JF, o trecho urbano do Posto km 271 até Benfica (passando por Juiz de Fora, Mariano Procópio e Francisco Bernardino) soma 126 acidentes e **74 dos 104 óbitos**. Não há tendência de queda: 19 acidentes e 7 óbitos em 2025.
+
+**5. O que o registro diz sobre a causa?** De dez/2020 (quando a causa contributiva passou a existir) a dez/2025, **84 dos 185 atropelamentos com morte na MRS (45%)** foram registrados como suicídio ou tentativa. Depois vêm invasão da faixa de segurança e falta de atenção à circulação. Muro e passarela atendem a invasão; o suicídio pede também parceria com a rede de saúde mental do município. A causa é a que a concessionária declara, não conclusão de perícia.
+
+> Se você está passando por um momento difícil, o [CVV](https://cvv.org.br/) atende de graça, 24 horas, pelo telefone **188**.
+
 ## Decisões técnicas
 
 - **Coordenadas dos pátios oficiais, não do OpenStreetMap.** O SIADE identifica a estação só por nome e UF. O OSM cobria 18% da tonelagem da MRS e casava nomes errados ("Floriano" com Marechal Floriano, no ES). A camada de pátios declarados à ANTT, publicada pela InfraSA, casa 524 das 533 estações pelo nome. Com uma correção manual, cobre 99,97% da carga, incluindo todas as estações da MRS.
@@ -97,6 +123,13 @@ As 31,0 mi t fora do trilho são cerca de **840 mil viagens de caminhão por ano
 - **Comex Stat pela API, com o certificado verificado.** Os arquivos em lote do Comex Stat estão num servidor com o certificado vencido desde 03/10/2026 (e sem o intermediário na cadeia). A API, em outro domínio, tem certificado válido e entrega o mesmo dado agregado por UF, porto e posição SH4. Ela limita a frequência de consultas e continua respondendo 429 por bem mais que os 10 s que a mensagem pede, então a ingestão espera entre um ano e outro e tenta de novo com intervalo crescente.
 - **Chegada ao porto pelo raio, não por lista de estações.** Conta como chegada a Santos todo fluxo que termina numa estação a até 30 km do porto (`seeds/portos.csv`). Um terminal novo que a ANTT passe a informar entra sozinho.
 - **Trem e exportação têm de conversar.** Num ano inteiro, o trem não pode trazer mais que 110% do que o porto exportou do mesmo produto; o máximo medido foi o milho em 2021 (102%), ano de safrinha frustrada. A primeira versão do mart partia da exportação e juntava o trilho depois, então um trilho sem exportação correspondente sumia sem erro. Uma sabotagem pegou isso: mapeei a soja do SIADE para uma posição SH4 que não tinha sido baixada, e o teste passou. Com um full join, o trilho sem exportação aparece com exportação zero, e a mesma sabotagem faz o teste falhar.
+- **A data do acidente tem dois formatos no mesmo arquivo.** No arquivo de dez/2020 em diante, toda data com dia até 12 veio como MM/DD ("12/01/2020" é 1º de dezembro), e as demais como DD/MM. Lido de um jeito só, 1.345 das 3.710 linhas (36%) cairiam na data errada. A ingestão decide o formato de cada arquivo pela ordem dele: uma data ambígua vale na leitura que fica mais perto das vizinhas sem ambiguidade. Hoje a votação é de 1.345 a 0 no arquivo novo e de 3.930 a 0 no antigo, e a carga para se ela ficar abaixo de 99%.
+- **Um teste que pega só a borda.** `assert_acidente_dentro_do_periodo_do_arquivo` exige que a data caia no período que o nome do arquivo declara. Sabotado com o arquivo novo lido como DD/MM, ele falhou, mas apontou só 35 das 1.345 datas erradas, as dos meses de borda. Ele é alarme, e a decisão de verdade fica na ingestão.
+- **A série de acidentes começa em 2011.** O mart marca `registro_completo`, e o painel abre em 2011–2025, com as barras anteriores em cinza.
+- **Duplicata com digitação diferente.** O arquivo de 2004–2020 tem 29 acidentes registrados duas ou três vezes, com o prefixo do trem escrito de outro jeito ("K- 01" e "K--01"). A chave é ferrovia, data, hora, quilômetro e prefixo sem pontuação. Nenhuma cópia diverge no número de óbitos, e fica a mais preenchida.
+- **Acidentes por TKU, não por trem·km.** O índice oficial da ANTT divide por trem·km, que não é dado aberto, e o arquivo do índice "de 2006 a 2025" foi publicado vazio. O painel usa graves por bilhão de TKU, nos meses que as duas fontes cobrem, e mostra o índice oficial ao lado até 2019. Por tonelada, ferrovias de minério pesado levam vantagem; a métrica serve mais para acompanhar uma ferrovia no tempo do que para ranqueá-las.
+- **O nome do maquinista não entra no banco.** A coluna `Equipagem` do RAAF traz o nome de quem conduzia o trem. A ingestão a descarta antes de gravar.
+- **A causa mudou de classificação em dez/2020.** "Interferência de terceiro" vai de 21% para 74% dos acidentes e "Casos fortuitos ou de força maior" de 30% para 3%. O mart marca `taxonomia_causa`, e nenhuma análise compara causa entre os dois períodos.
 - **Notebooks só leem os marts.** Nenhuma regra de limpeza mora nos notebooks, então o número deles é o mesmo do painel.
 
 ## Achado de qualidade de dados
@@ -111,15 +144,16 @@ Requisitos: Docker e [uv](https://docs.astral.sh/uv/).
 cp .env.example .env
 uv sync
 make pipeline        # sobe o PostGIS, ingere, roda dbt build (modelos + testes) e exporta o painel
-make site            # serve o painel em http://localhost:8001
+make site            # serve o painel em http://localhost:8001 (acidentes em /seguranca.html)
 make analise         # abre os notebooks no Jupyter Lab
 ```
 
-Outros alvos: `make ingest`, `make transform`, `make export`, `make docs` e `make down`.
+Outros alvos: `make ingest`, `make acidentes`, `make transform`, `make export`, `make docs` e `make down`.
 
 ## Fontes
 
 - Produção origem-destino: [ANTT, SIADE](https://dados.antt.gov.br/dataset/sistema-de-acompanhamento-do-desempenho-operacional-das-concessionarias-siade)
+- Acidentes ferroviários e índice de acidentes: [ANTT, RAAF](https://dados.antt.gov.br/dataset/relatorio-de-acompanhamento-de-acidentes-ferroviarios-raaf)
 - Exportação por UF, porto e mercadoria: [Comex Stat, MDIC](https://comexstat.mdic.gov.br/) (API `api-comexstat.mdic.gov.br`)
 - Pátios ferroviários: [InfraSA](https://geo.infrasa.gov.br/server/rest/services/P%C3%A1tio_Ferrovi%C3%A1rio/MapServer)
 - Mapa base: © [CARTO](https://carto.com/), © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Acidentes nas Ferrovias do Brasil</title>
+  <meta name="description" content="Acidentes ferroviários registrados pela ANTT desde 2004, por ferrovia, estação e município, contra a carga transportada.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="mapa" aria-label="Mapa dos acidentes ferroviários por estação"></div>
+
+  <aside id="painel">
+    <header>
+      <nav class="abas" aria-label="Páginas do painel">
+        <a href="./">Carga</a>
+        <a href="seguranca.html" aria-current="page">Acidentes</a>
+      </nav>
+      <h1>Acidentes nas ferrovias do Brasil</h1>
+      <p class="sub">Registros declarados à ANTT · <span id="atualizado">carregando…</span></p>
+    </header>
+
+    <section class="controles" aria-label="Filtros">
+      <div class="controles-topo">
+        <span class="rotulo">Filtros</span>
+        <button type="button" id="limpar" class="link" hidden>Limpar filtros</button>
+      </div>
+      <label class="largo">Ferrovia
+        <select id="ferrovia"></select>
+      </label>
+      <label>Período
+        <select id="periodo"></select>
+      </label>
+      <label>Município
+        <input id="municipio" type="search" list="lista-municipios" placeholder="Todos" autocomplete="off">
+        <datalist id="lista-municipios"></datalist>
+      </label>
+    </section>
+
+    <p class="recorte"><span class="rotulo">Recorte</span> <strong id="recorte">–</strong></p>
+
+    <section class="cards">
+      <div class="card">
+        <span class="rotulo">Acidentes</span>
+        <strong id="acidentes">–</strong>
+      </div>
+      <div class="card">
+        <span class="rotulo">Óbitos</span>
+        <strong id="obitos">–</strong>
+      </div>
+      <div class="card">
+        <span class="rotulo">Graves</span>
+        <strong id="graves">–</strong>
+      </div>
+      <div class="card">
+        <span class="rotulo">Passagem em nível</span>
+        <strong id="pn">–</strong>
+      </div>
+    </section>
+
+    <section class="grafico">
+      <div class="grafico-topo">
+        <span class="rotulo">Acidentes por ano</span>
+        <span class="dica">clique para escolher o ano</span>
+      </div>
+      <svg id="serie" role="img" aria-label="Acidentes por ano desde 2004"></svg>
+      <p class="dica">Antes de 2011 o registro só tem acidentes graves e quase nenhum óbito: as barras cinza não se comparam com as azuis.</p>
+    </section>
+
+    <section class="grafico">
+      <span class="rotulo">Por natureza <span class="dica">clique para filtrar</span></span>
+      <div id="naturezas" class="barras-h" role="list"></div>
+    </section>
+
+    <section class="grafico">
+      <span class="rotulo">Graves por bilhão de TKU · <span id="rotulo-comparacao"></span></span>
+      <div id="comparacao" class="barras-h" role="list"></div>
+      <p class="dica">Métrica deste painel. A ANTT divide por trem·km, que não é dado aberto, e publicou o índice só até 2019. Por tonelada, ferrovias de minério pesado como a EFC levam vantagem.</p>
+    </section>
+
+    <section class="grafico">
+      <span class="rotulo">Municípios com mais acidentes <span class="dica">clique para filtrar</span></span>
+      <ol id="municipios" class="rotas"></ol>
+    </section>
+
+    <section id="nota-cvv" class="nota" hidden>
+      <p id="texto-cvv"></p>
+      <p>Se você está passando por um momento difícil, o <a href="https://cvv.org.br/" target="_blank" rel="noopener">CVV</a> atende de graça, 24 horas, pelo telefone <strong>188</strong>.</p>
+    </section>
+
+    <footer>
+      <div class="legenda-mapa" aria-label="Legenda do mapa">
+        <span class="rotulo">Cor do ponto: natureza mais comum no local</span>
+        <ul id="legenda"></ul>
+      </div>
+      <p class="fonte">O ponto é o pátio da estação anterior ao acidente, não o quilômetro exato.
+        Dados: <a href="https://dados.antt.gov.br/dataset/relatorio-de-acompanhamento-de-acidentes-ferroviarios-raaf" target="_blank" rel="noopener">ANTT / RAAF</a>,
+        <a href="https://dados.antt.gov.br/dataset/sistema-de-acompanhamento-do-desempenho-operacional-das-concessionarias-siade" target="_blank" rel="noopener">SIADE</a> e pátios da <a href="https://geo.infrasa.gov.br/" target="_blank" rel="noopener">InfraSA</a>.
+        <a href="dbt/" target="_blank" rel="noopener">Documentação dos dados</a> ·
+        <a href="https://github.com/LuissFellipe/ferrovias-br" target="_blank" rel="noopener">Código do pipeline</a></p>
+    </footer>
+  </aside>
+
+  <div id="tooltip" hidden></div>
+
+  <script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
+  <script src="https://unpkg.com/deck.gl@9.1.14/dist.min.js"></script>
+  <script src="seguranca.js"></script>
+</body>
+</html>

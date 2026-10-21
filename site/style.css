@@ -156,6 +156,39 @@ footer { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
 #tooltip strong { font-weight: 600; }
 #tooltip .t2 { color: var(--texto-2); }
 
+.abas { display: flex; gap: 4px; margin-bottom: 12px; }
+.abas a {
+  padding: 4px 10px;
+  border: 1px solid var(--borda);
+  border-radius: 999px;
+  color: var(--texto-2);
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.abas a:hover { color: var(--texto); }
+.abas a[aria-current="page"] { color: var(--texto); background: rgba(255, 255, 255, 0.08); }
+
+#serie .barra { fill: var(--serie-fraca); }
+#serie .barra.ativa { fill: var(--serie); }
+#serie .barra.incompleta { fill: rgba(255, 255, 255, 0.12); }
+
+.rotas li.clicavel { cursor: pointer; }
+.rotas li.clicavel:focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; }
+.rotas li.ativa .trecho { font-weight: 600; }
+#legenda .sw.ponto { width: 10px; height: 10px; border-radius: 50%; }
+
+.nota {
+  padding: 12px;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  font-size: 12px;
+  color: var(--texto-2);
+}
+.nota p { margin: 0; }
+.nota p + p { margin-top: 6px; }
+.nota strong { color: var(--texto); }
+
 .maplibregl-ctrl-attrib { font-size: 10px; }
 
 @media (max-width: 720px) {
