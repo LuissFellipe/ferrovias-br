@@ -83,3 +83,17 @@ models:
         description: Métrica deste projeto, não da ANTT. Nula quando a ferrovia não declarou carga no ano.
       - name: indice_oficial
         description: Acidentes por milhão de trem·km publicado pela ANTT. Nulo depois de 2019, porque o arquivo até 2025 saiu vazio.
+
+  - name: fct_acidentes_na_linha_jf
+    description: >
+      Acidentes da MRS em Juiz de Fora (Linha do Centro) com o ponto no traçado
+      do OSM, interpolado pelo km entre as estações de referência. Junta com
+      fct_acidentes por acidente_id.
+    columns:
+      - name: acidente_id
+        tests:
+          - unique
+          - not_null
+          - relationships: {to: ref('fct_acidentes'), field: acidente_id}
+      - name: vao_entre_ancoras_km
+        description: Distância entre as duas estações de referência que cercam o acidente. Quanto maior, maior o erro de posição (30 m com 6 km; 1,2 km com 24 km).

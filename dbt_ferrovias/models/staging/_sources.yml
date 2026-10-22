@@ -26,3 +26,13 @@ sources:
     tables:
       - name: comex_exportacao
         description: Exportação mensal em kg por UF do produto, URF de despacho e posição SH4 (API do Comex Stat).
+  - name: osm
+    schema: raw
+    tables:
+      - name: osm_jf
+        description: >
+          Linha principal da MRS em Juiz de Fora, as ruas e caminhos que a tocam
+          e os nós de passagem em nível, de uma cópia fixa do OpenStreetMap
+          (© colaboradores do OpenStreetMap, ODbL).
+      - name: osm_jf_copia
+        description: O arquivo da cópia do OSM que está carregado.

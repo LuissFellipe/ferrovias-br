@@ -20,3 +20,18 @@ models:
     columns:
       - name: acidente_id
         tests: [unique, not_null]
+
+  - name: int_estacoes__km_linha_jf
+    description: >
+      Estações da Linha do Centro em Juiz de Fora com o km oficial deduzido dos
+      acidentes (meio da janela entre o último acidente antes e o primeiro
+      depois) e a posição do pátio sobre o traçado do OSM. São as âncoras que
+      ligam o km ao mapa.
+    columns:
+      - name: estacao
+        tests: [unique, not_null]
+  - name: int_acidentes__na_linha_jf
+    description: Acidentes da MRS na Linha do Centro em Juiz de Fora postos sobre o traçado pelo km, entre duas estações de referência.
+    columns:
+      - name: acidente_id
+        tests: [unique, not_null]

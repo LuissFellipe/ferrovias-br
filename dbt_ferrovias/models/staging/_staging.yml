@@ -86,3 +86,8 @@ models:
     tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns: [ferrovia, ano]
+
+  - name: stg_osm__linha_jf
+    description: Linha principal da MRS entre Matias Barbosa e Ewbank da Câmara, em metros (EPSG 31983), começando no sul.
+  - name: stg_osm__travessias_jf
+    description: Passagens em nível e cruzamentos de rua com a linha principal, pela distância em metros desde o começo do traçado.
