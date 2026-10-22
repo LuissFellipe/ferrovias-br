@@ -206,3 +206,29 @@ footer { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
   .card strong { font-size: 19px; }
   #serie { height: 110px; }
 }
+
+/* Página de Juiz de Fora */
+.lead { margin: -6px 0 0; font-size: 13px; color: var(--texto-2); }
+.lead strong { color: var(--texto); font-weight: 600; }
+#ranking { width: 100%; display: block; }
+#ranking text { fill: var(--texto-2); font-size: 10px; font-variant-numeric: tabular-nums; }
+#ranking .grade { stroke: var(--grade); stroke-width: 1; }
+#ranking .alvo { fill: transparent; }
+#ranking .linha-ranking { cursor: pointer; }
+#ranking .linha-ranking:hover .alvo, #ranking .linha-ranking.ativa .alvo { fill: rgba(255, 255, 255, 0.05); }
+#ranking .linha-ranking:focus-visible { outline: 2px solid var(--acento); }
+#ranking .nome { fill: var(--texto); font-size: 12px; }
+#ranking .linha-ranking.ativa .nome { font-weight: 600; }
+#ranking .valor { fill: var(--texto); font-size: 12px; }
+#ranking .intervalo { stroke: rgba(217, 89, 38, 0.55); stroke-width: 2; stroke-linecap: round; }
+#ranking .esperado { stroke: var(--texto-2); stroke-width: 2; stroke-linecap: round; }
+#ranking .estimado { fill: var(--cat-2); stroke: var(--painel); stroke-width: 2; }
+#d-fechar { width: 28px; height: 28px; padding: 0; font-size: 18px; line-height: 1; flex: none; }
+.d-texto { margin: 8px 0 0; color: var(--texto-2); font-size: 13px; }
+.d-texto strong { color: var(--texto); font-weight: 600; }
+#d-horas-bloco { margin-top: 12px; }
+#d-horas { width: 100%; height: 90px; display: block; }
+#d-horas .barra { fill: var(--serie); }
+#d-horas text { fill: var(--texto-2); font-size: 10px; font-variant-numeric: tabular-nums; }
+.memo ol { margin: 6px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.memo li::marker { color: var(--texto-2); }

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Linha em Juiz de Fora</title>
+  <meta name="description" content="Onde a linha da MRS em Juiz de Fora tem mais atropelamentos do que o movimento em volta explica, trecho a trecho, de 2011 a 2025.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="mapa" aria-label="Mapa dos trechos da linha em Juiz de Fora"></div>
+
+  <aside id="painel">
+    <header>
+      <nav class="abas" aria-label="Páginas do painel">
+        <a href="./">Carga</a>
+        <a href="seguranca.html">Acidentes</a>
+        <a href="juiz-de-fora.html" aria-current="page">Juiz de Fora</a>
+      </nav>
+      <h1>Onde intervir na linha em Juiz de Fora</h1>
+      <p class="sub">Atropelamentos de 2011 a 2025, trecho a trecho · <span id="atualizado">carregando…</span></p>
+    </header>
+
+    <p class="lead">A MRS se comprometeu, na renovação da concessão, a fazer cerca de <strong>22 km de vedação</strong> em Juiz de Fora até 2027 e a melhorar <strong>9 travessias de pedestres</strong>, com os pontos ainda a definir (<a href="https://tribunademinas.com.br/noticias/cidade/26-03-2023/mrs-elabora-estudos-tecnicos-para-construcao-de-viadutos-em-juiz-de-fora.html" target="_blank" rel="noopener">Tribuna de Minas, 2023</a>). Esta página ordena os trechos de 1 km pelo que uma intervenção tem a ganhar em cada um.</p>
+
+    <section class="cards">
+      <div class="card"><span class="rotulo">Atropelamentos</span><strong id="c-atrop">–</strong></div>
+      <div class="card"><span class="rotulo">Óbitos</span><strong id="c-obitos">–</strong></div>
+      <div class="card"><span class="rotulo">Em passagem em nível</span><strong id="c-pn">–</strong></div>
+      <div class="card"><span class="rotulo">Excesso nos 3 primeiros</span><strong id="c-excesso">–</strong></div>
+    </section>
+
+    <section class="grafico">
+      <div class="grafico-topo">
+        <span class="rotulo">Trechos com mais atropelamentos do que o movimento explica</span>
+      </div>
+      <p class="dica">Ponto: atropelamentos estimados no trecho (barra: intervalo de 90%). Traço cinza: o esperado para um trecho com o mesmo comércio e a mesma população em volta. Clique para ver o trecho.</p>
+      <svg id="ranking" role="img" aria-label="Atropelamentos estimados contra esperados nos trechos com maior excesso"></svg>
+      <p class="dica" id="comparacao-contagem"></p>
+    </section>
+
+    <section id="detalhe" class="estacao" hidden>
+      <div class="estacao-topo">
+        <h2 id="d-titulo"></h2>
+        <button type="button" id="d-fechar" aria-label="Fechar o trecho">×</button>
+      </div>
+      <p id="d-resumo" class="d-texto"></p>
+      <div id="d-horas-bloco" class="grafico">
+        <span class="rotulo">Atropelamentos por hora do dia</span>
+        <svg id="d-horas" role="img" aria-label="Atropelamentos por faixa de três horas"></svg>
+      </div>
+      <p id="d-entorno" class="d-texto"></p>
+      <p id="d-intervencao" class="d-texto"></p>
+    </section>
+
+    <section class="memo">
+      <span class="rotulo">Recomendação</span>
+      <ol id="recomendacoes"></ol>
+      <p class="d-texto" id="total-recomendacoes"></p>
+      <p class="dica" id="antes-depois"></p>
+    </section>
+
+    <section class="nota">
+      <p><strong>Como foi feito.</strong> O acidente da ANTT não tem coordenada, só o km. O km de cada estação foi deduzido dos próprios registros e o acidente, interpolado sobre o traçado do OpenStreetMap: a posição erra de 100 a 300 m, por isso os trechos têm 1 km. O esperado vem de uma regressão binomial negativa com o comércio e serviço (CNEFE 2022) e os moradores (Censo 2022) a até 500 m; o estimado é o empírico-bayesiano do <em>Highway Safety Manual</em>, que puxa para a média o trecho com poucos casos. O valor social usa o custo de um acidente rodoviário com morte do Ipea (2014), corrigido pelo IPCA: é ordem de grandeza.</p>
+      <p><strong>O que os dados não dizem.</strong> A rua indicada é a provável, a 100–300 m de erro. Quase metade dos atropelamentos com morte na MRS foi registrada como suicídio; por isso esta página não mostra causa por lugar, e vedação também é medida de prevenção.</p>
+      <p>Se você está passando por um momento difícil, o <a href="https://cvv.org.br/" target="_blank" rel="noopener">CVV</a> atende de graça, 24 horas, pelo telefone <strong>188</strong>.</p>
+    </section>
+
+    <footer>
+      <div class="legenda-mapa" aria-label="Legenda do mapa">
+        <span class="rotulo">No mapa</span>
+        <ul id="legenda">
+          <li><span class="sw" style="background: rgb(217, 89, 38)"></span>Trecho com excesso</li>
+          <li><span class="sw" style="background: rgba(138, 138, 146, 0.6)"></span>Dentro do esperado</li>
+          <li><span class="sw ponto" style="background: rgb(57, 135, 229)"></span>Em passagem em nível</li>
+          <li><span class="sw ponto" style="background: rgb(25, 158, 112)"></span>Fora da passagem</li>
+        </ul>
+      </div>
+      <p class="fonte">Dados: <a href="https://dados.antt.gov.br/dataset/relatorio-de-acompanhamento-de-acidentes-ferroviarios-raaf" target="_blank" rel="noopener">ANTT / RAAF</a>,
+        IBGE (<a href="https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/malha_com_atributos/" target="_blank" rel="noopener">Censo 2022</a> e <a href="https://ftp.ibge.gov.br/Cadastro_Nacional_de_Enderecos_para_Fins_Estatisticos/Censo_Demografico_2022/" target="_blank" rel="noopener">CNEFE</a>),
+        INEP via <a href="https://ipeagit.github.io/geobr/" target="_blank" rel="noopener">geobr</a>, traçado © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>.
+        <a href="https://github.com/LuissFellipe/ferrovias-br/blob/master/docs/memorando_jf.md" target="_blank" rel="noopener">Memorando</a> ·
+        <a href="https://github.com/LuissFellipe/ferrovias-br/blob/master/analises/05_juiz_de_fora.ipynb" target="_blank" rel="noopener">Notebook</a> ·
+        <a href="https://github.com/LuissFellipe/ferrovias-br" target="_blank" rel="noopener">Código</a></p>
+    </footer>
+  </aside>
+
+  <div id="tooltip" hidden></div>
+
+  <script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
+  <script src="https://unpkg.com/deck.gl@9.1.14/dist.min.js"></script>
+  <script src="juiz-de-fora.js"></script>
+</body>
+</html>

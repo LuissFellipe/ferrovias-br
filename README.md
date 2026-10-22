@@ -2,7 +2,7 @@
 
 Pipeline ELT que coleta a **produção ferroviária por origem e destino** e os **acidentes ferroviários** que as concessionárias declaram à ANTT. Ele localiza cada estação no mapa, transforma os dados com dbt e publica um **painel de fluxos** e um **painel de acidentes** no GitHub Pages. O foco é a **MRS Logística**.
 
-**🚆 Carga:** https://luissfellipe.github.io/ferrovias-br/ · **⚠️ Acidentes:** https://luissfellipe.github.io/ferrovias-br/seguranca.html · **📚 Documentação do dbt:** https://luissfellipe.github.io/ferrovias-br/dbt/
+**🚆 Carga:** https://luissfellipe.github.io/ferrovias-br/ · **⚠️ Acidentes:** https://luissfellipe.github.io/ferrovias-br/seguranca.html · **📍 Juiz de Fora:** https://luissfellipe.github.io/ferrovias-br/juiz-de-fora.html · **📚 Documentação do dbt:** https://luissfellipe.github.io/ferrovias-br/dbt/
 
 ![Painel com os fluxos da MRS em 2025](docs/painel.png)
 
@@ -119,9 +119,24 @@ As 31,0 mi t fora do trilho são cerca de **840 mil viagens de caminhão por ano
 
 **6. Dá para apontar o lugar exato em Juiz de Fora?** Não o ponto, mas o quilômetro, sim. O acidente não tem coordenada, só o km na linha, e o mapa acima o desenha no pátio da estação. Isso erra muito em JF: quando o registro cita uma estação só, ela é de referência administrativa, não a anterior. 17 registros citam só "Francisco Bernardino" com km entre 271 e 280, no centro, a até 10 km do pátio. Para pôr o km no traçado do OpenStreetMap, o km oficial de cada estação foi deduzido dos próprios acidentes. Quem registra "entre Juiz de Fora e Mariano Procópio, km 275,864" diz que Juiz de Fora fica antes desse km, e assim a estação de Juiz de Fora fica presa numa janela de 160 m. Entre duas estações, a posição é interpolada. Tirando uma estação da lista e prevendo a posição dela pelas vizinhas, o erro no centro foi de 16 a 30 m. Somada a incerteza das próprias âncoras (80 a 250 m), a posição serve para trechos de 1 km, não de 500 m: com ±200 m de erro, 34% dos atropelamentos trocariam de trecho de 500 m, e o ranking mudaria quando a grade é deslocada. Com 1 km, em 200 sorteios com ruído, os km 275 e 274 ficam entre os três mais graves em 200 e 198 deles, e o km 273 em 162.
 
-**7. O centro é perigoso ou só é cheio?** Moram 106 mil pessoas a até 500 m da linha em JF. Mas o Censo conta quem mora, e o centro é comercial: o km 275 tem 2.414 endereços de comércio e serviço no CNEFE e o 276 tem 1.269, contra 100 a 700 nos outros trechos urbanos. Por isso cada trecho tem três medidas de exposição: moradores, comércio e serviço, e escolas. O ranking que compara atropelamentos com essa exposição é o próximo passo.
+**7. O centro é perigoso ou só é cheio?** Moram 106 mil pessoas a até 500 m da linha em JF. Mas o Censo conta quem mora, e o centro é comercial: o km 275 tem 2.414 endereços de comércio e serviço no CNEFE e o 276 tem 1.269, contra 100 a 700 nos outros trechos urbanos. Por isso cada trecho tem três medidas de exposição: moradores, comércio e serviço, e escolas. O ranking que compara os atropelamentos com essa exposição está em [Juiz de Fora: onde intervir na linha](#juiz-de-fora-onde-intervir-na-linha).
 
 > Se você está passando por um momento difícil, o [CVV](https://cvv.org.br/) atende de graça, 24 horas, pelo telefone **188**.
+
+## Juiz de Fora: onde intervir na linha
+
+![Página de Juiz de Fora com o ranking dos trechos](docs/juiz-de-fora.png)
+
+**Para quem:** a segurança operacional e a relação com comunidades da MRS, e a prefeitura. No plano de investimentos da renovação da concessão, a MRS prevê cerca de 22 km de vedação em Juiz de Fora até 2027 e melhorias em 9 travessias de pedestres, com os pontos a definir ([Tribuna de Minas, 2023](https://tribunademinas.com.br/noticias/cidade/26-03-2023/mrs-elabora-estudos-tecnicos-para-construcao-de-viadutos-em-juiz-de-fora.html)). A pergunta é onde.
+
+**Como:** cada atropelamento de 2011 a 2025 foi posto no traçado pelo km (pergunta 6 acima), e a linha foi dividida em trechos de 1 km. Cada trecho é comparado com o esperado para o seu movimento: uma regressão binomial negativa com o comércio e serviço (CNEFE 2022) e os moradores (Censo 2022) a até 500 m, e o método empírico-bayesiano do *Highway Safety Manual*, que puxa para a média o trecho com poucos casos. A análise está em [`analises/05_juiz_de_fora.ipynb`](analises/05_juiz_de_fora.ipynb), e a recomendação, no [memorando de uma página](docs/memorando_jf.md).
+
+- **Quem circula explica, quem mora não.** O coeficiente do comércio e serviço é 0,43 (p = 0,01) e o dos moradores, 0,16 (p = 0,37). Só com moradores, o centro pareceria muito mais perigoso do que é.
+- **Os três trechos prioritários são os km 274, 275 e 273.** O km 274 teve 25 atropelamentos contra 11,3 esperados, o 275 teve 32 contra 21,9 e o 273, 17 contra 10,1. Nos dois primeiros, 68% e 78% dos casos foram em passagem em nível; no 273, 76% foram fora dela. O primeiro tipo pede tratamento da passagem, o segundo, vedação com travessia segura. Duas das três passagens que o plano da MRS manda melhorar (Rua João Luiz de Barros e Praça da Estação) caem nesses trechos.
+- **O km 265, perto do Retiro, é o 4º:** 9 atropelamentos onde se esperavam 2,2. Ele não aparece numa contagem simples. O km 276, 3º em contagem, cai para 5º, porque o movimento explica quase todos os casos dele.
+- **O excesso dos três vale cerca de R$ 970 mil por ano** em custo social: 1,5 atropelamento e 0,8 óbito por ano, a R$ 1,18 milhão por óbito (Ipea, 2014, corrigido pelo IPCA).
+- **O ranking aguenta o erro de posição e a escolha do raio.** Com ±200 m, os km 274 e 273 ficam no top 3 em 200 de 200 sorteios, e o 275 em 186. Com faixas de 300, 500 ou 800 m, os cinco primeiros são os mesmos.
+- **A passarela restaurada na Estação Central (2021–2022) não tem efeito mensurável:** razão de 0,90, com intervalo de 95% de 0,34 a 2,13. Com tão poucos casos, só uma queda de mais de dois terços apareceria.
 
 ## Decisões técnicas
 
@@ -151,7 +166,9 @@ As 31,0 mi t fora do trilho são cerca de **840 mil viagens de caminhão por ano
 - **Saúde pelo CNEFE, não pelo CNES.** O geobr põe na sede do município todo estabelecimento do CNES cuja coordenada não confere. Em JF, 1.621 dos 2.096 registros estão nesse ponto, a 1 km da estação central, e inflariam o trecho do centro. No CNEFE, só 3 dos 307.905 endereços de JF não têm a coordenada do endereço ou da face de quadra.
 - **Recortes fixos para a exposição.** Os originais (setores de Minas, escolas do Brasil) passam de 280 MB e não mudam. O repositório guarda o recorte de JF em `ingest/exposicao_jf/`, e `uv run python ingest/ingest_exposicao_jf.py --baixar` o refaz. Um teste exige que os setores somem os 540.756 moradores do Censo. Do CNEFE entram só a espécie e a coordenada, sem endereço nem nome de estabelecimento.
 - **Faixa de ponta reta.** Cada lugar deve contar para o trecho em frente a ele. Com a ponta reta, a soma dos trechos passa a faixa da linha inteira em 3,5% (curvas); com a ponta redonda, o teste de dupla contagem falha.
-- **Notebooks só leem os marts.** Nenhuma regra de limpeza mora nos notebooks, então o número deles é o mesmo do painel.
+- **O ranking é calculado em Python, não no dbt.** A regressão binomial negativa e o empírico-bayesiano estão em `export/ranking_jf.py`, que o export da página e o notebook 05 importam, então o número dos dois é o mesmo. A função se recusa a ranquear se a regressão não convergir ou não achar sobredispersão (α ≈ 0), porque aí o peso do observado vai a zero e todo trecho fica igual ao esperado.
+- **Nenhuma causa por lugar.** Quase metade dos atropelamentos com morte na MRS é registrada como suicídio, e as recomendações de comunicação da OMS desaconselham apontar onde suicídios se concentram. A página de Juiz de Fora e o notebook 05 não mostram causa por trecho.
+- **Notebooks só leem os marts.** Nenhuma regra de limpeza mora nos notebooks, então o número deles é o mesmo do painel. A exceção é uma célula do notebook 05 que refaz a exposição com raios de 300 e 800 m a partir do staging, para testar a sensibilidade do ranking.
 
 ## Achado de qualidade de dados
 

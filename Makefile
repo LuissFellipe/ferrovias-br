@@ -35,6 +35,7 @@ transform:
 export:
 	PYTHONPATH=ingest uv run python export/export_site.py
 	PYTHONPATH=ingest:export uv run python export/export_seguranca.py
+	PYTHONPATH=ingest:export uv run python export/export_jf.py
 
 pipeline: up ingest transform export
 
