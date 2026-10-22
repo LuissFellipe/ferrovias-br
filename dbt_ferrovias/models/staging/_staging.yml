@@ -91,3 +91,21 @@ models:
     description: Linha principal da MRS entre Matias Barbosa e Ewbank da Câmara, em metros (EPSG 31983), começando no sul.
   - name: stg_osm__travessias_jf
     description: Passagens em nível e cruzamentos de rua com a linha principal, pela distância em metros desde o começo do traçado.
+  - name: stg_ibge__setores_jf
+    description: Setores censitários de JF em metros (EPSG 31983), com a área para a ponderação.
+    columns:
+      - name: cd_setor
+        tests: [unique, not_null]
+      - name: pessoas
+        tests: [not_null]
+  - name: stg_inep__escolas_jf
+    description: Escolas em funcionamento em JF, em metros.
+    columns:
+      - name: escola_id
+        tests: [unique, not_null]
+  - name: stg_ibge__enderecos_jf
+    description: Endereços não residenciais de JF (CNEFE 2022), em metros. Um endereço com dois usos aparece duas vezes.
+    columns:
+      - name: especie
+        tests:
+          - accepted_values: {values: ['ensino', 'saúde', 'comércio e serviço', 'religioso']}

@@ -17,6 +17,7 @@ ANTT, SIADE (CKAN, 21 CSVs anuais) ─► ingest_producao.py ─┐
 InfraSA, pátios ferroviários (ArcGIS) ─► ingest_patios.py ─┤
 Comex Stat, exportação (API) ─────────► ingest_comex.py ───┤
 OpenStreetMap, linha em Juiz de Fora ─► ingest_osm_jf.py ──┤
+IBGE e INEP, entorno em JF ──────► ingest_exposicao_jf.py ─┤
 ANTT, RAAF (CKAN, acidentes) ─────────► ingest_acidentes.py ┴─► PostGIS (raw) ─► dbt ─► export_*.py ─► painel estático
                                                                        staging            JSON           MapLibre + deck.gl
                                                                        intermediate                      (GitHub Pages)
@@ -32,20 +33,24 @@ ANTT, RAAF (CKAN, acidentes) ─────────► ingest_acidentes.py 
 | raw | `raw.comex_exportacao` | Exportação mensal por UF do produto, porto (URF) e posição SH4 |
 | raw | `raw.acidentes`, `raw.indice_acidentes` | Acidentes como vieram, sem a coluna com o nome do maquinista, e o índice oficial |
 | raw | `raw.acidentes_arquivos` | O arquivo vigente de cada série, o período que ele declara e o formato de data detectado |
+| raw | `raw.setores_jf`, `raw.escolas_jf`, `raw.enderecos_jf` | Recortes fixos de JF: população por setor (Censo 2022), escolas em funcionamento (INEP 2023) e endereços não residenciais (CNEFE 2022) |
 | raw | `raw.osm_jf` | Linha principal da MRS em Juiz de Fora, ruas que a cruzam e passagens em nível, de uma cópia fixa do OpenStreetMap |
 | staging | `stg_antt__producao`, `stg_infrasa__patios` | Data, número no padrão brasileiro e nome de estação normalizado |
 | staging | `stg_antt__acidentes`, `stg_antt__indice_acidentes` | Data no formato de cada arquivo e natureza dos dois layouts na mesma lista |
+| staging | `stg_ibge__setores_jf`, `stg_inep__escolas_jf`, `stg_ibge__enderecos_jf` | As três camadas em metros |
 | staging | `stg_osm__linha_jf`, `stg_osm__travessias_jf` | O traçado em metros (SIRGAS 2000 / UTM 23S), começando no sul, e onde ruas o cruzam em nível |
 | intermediate | `int_producao__deduplicada` | Sem as repetições idênticas publicadas pela ANTT |
 | intermediate | `int_estacoes__geolocalizadas` | Cada estação do SIADE com o pátio correspondente |
 | intermediate | `int_acidentes__deduplicados`, `int_acidentes__geolocalizados` | Sem os registros repetidos, e com o pátio da estação anterior ao acidente |
 | intermediate | `int_estacoes__km_linha_jf`, `int_acidentes__na_linha_jf` | O km de cada estação em JF deduzido dos acidentes, e cada acidente posto no traçado pelo km |
+| intermediate | `int_trechos_jf` | Os trechos de 1 km do km oficial desenhados sobre o traçado (de 746 a 1.185 m cada) |
 | marts | `dim_estacoes`, `dim_ferrovias`, `dim_mercadorias` | Estação com coordenada, concessionária e mercadoria com grupo |
 | marts | `fct_producao_mensal` | Um fluxo por mês, ferrovia, mercadoria, origem e destino |
 | marts | `fct_fluxos_anuais`, `fct_ferrovia_grupo_mensal` | Agregados que o painel e os notebooks leem |
 | marts | `fct_porto_produto_mensal`, `fct_porto_produto_uf_anual` | Exportação por porto e produto contra o que chegou de trem ao porto |
 | marts | `fct_acidentes`, `fct_acidentes_ferrovia_anual` | Um acidente por linha, e acidentes, óbitos e graves por bilhão de TKU por ferrovia e ano |
 | marts | `fct_acidentes_na_linha_jf` | Acidentes em Juiz de Fora com o ponto no traçado e o trecho de 1 km |
+| marts | `fct_trechos_jf` | Por trecho: acidentes de 2011 a 2025 e, a até 500 m, moradores (por lado da linha), escolas, comércio e serviço, saúde e travessias |
 
 ## O que os dados mostram
 
@@ -114,6 +119,8 @@ As 31,0 mi t fora do trilho são cerca de **840 mil viagens de caminhão por ano
 
 **6. Dá para apontar o lugar exato em Juiz de Fora?** Não o ponto, mas o quilômetro, sim. O acidente não tem coordenada, só o km na linha, e o mapa acima o desenha no pátio da estação. Isso erra muito em JF: quando o registro cita uma estação só, ela é de referência administrativa, não a anterior. 17 registros citam só "Francisco Bernardino" com km entre 271 e 280, no centro, a até 10 km do pátio. Para pôr o km no traçado do OpenStreetMap, o km oficial de cada estação foi deduzido dos próprios acidentes. Quem registra "entre Juiz de Fora e Mariano Procópio, km 275,864" diz que Juiz de Fora fica antes desse km, e assim a estação de Juiz de Fora fica presa numa janela de 160 m. Entre duas estações, a posição é interpolada. Tirando uma estação da lista e prevendo a posição dela pelas vizinhas, o erro no centro foi de 16 a 30 m. Somada a incerteza das próprias âncoras (80 a 250 m), a posição serve para trechos de 1 km, não de 500 m: com ±200 m de erro, 34% dos atropelamentos trocariam de trecho de 500 m, e o ranking mudaria quando a grade é deslocada. Com 1 km, em 200 sorteios com ruído, os km 275 e 274 ficam entre os três mais graves em 200 e 198 deles, e o km 273 em 162.
 
+**7. O centro é perigoso ou só é cheio?** Moram 106 mil pessoas a até 500 m da linha em JF. Mas o Censo conta quem mora, e o centro é comercial: o km 275 tem 2.414 endereços de comércio e serviço no CNEFE e o 276 tem 1.269, contra 100 a 700 nos outros trechos urbanos. Por isso cada trecho tem três medidas de exposição: moradores, comércio e serviço, e escolas. O ranking que compara atropelamentos com essa exposição é o próximo passo.
+
 > Se você está passando por um momento difícil, o [CVV](https://cvv.org.br/) atende de graça, 24 horas, pelo telefone **188**.
 
 ## Decisões técnicas
@@ -141,6 +148,9 @@ As 31,0 mi t fora do trilho são cerca de **840 mil viagens de caminhão por ano
 - **O nome do posto não é o km.** Entre o "Posto km 261" e o "Posto km 271" o traçado mede 7,0 km. De Cedofeita ao Posto km 271, 13 km de traçado, o km oficial se adianta 2,1 km em relação à distância medida, e até Francisco Bernardino volta quase ao ponto de partida. Uma régua única erraria de centenas de metros a quilômetros, então o km é ligado ao traçado estação por estação.
 - **O traçado do OSM vem de uma cópia fixa.** A posição de cada acidente é uma distância medida sobre o traçado: uma edição no OSM mudaria o lugar dos acidentes sem nenhuma mudança na ANTT. A carga usa `ingest/osm_jf_AAAA-MM-DD.json.gz`, e `uv run python ingest/ingest_osm_jf.py --baixar` renova a cópia. A distância é medida em metros (UTM 23S), e não em graus: aqui um grau de longitude é 7% mais curto que um de latitude, e a fração do traçado mudaria com a direção do trecho.
 - **Um teste que parecia bom e não tinha poder.** A primeira validação foi a distância de cada acidente em passagem em nível até a travessia mais próxima do OSM: mediana de 170 m, contra 504 m de um ponto qualquer da linha. Deslocando todos os acidentes de −1 km a +1 km, a mediana ficou entre 79 e 178 m em qualquer deslocamento, porque no centro há uma travessia a cada 200–300 m. O teste foi removido. Ficaram dois que pegam erro de verdade: o de tirar uma estação e prever a posição dela (sabotado com o traçado invertido, falha) e o de que o acidente "entre A e B" cai entre os pátios de A e B (sabotado com os acidentes deslocados 400 m, falha).
+- **Saúde pelo CNEFE, não pelo CNES.** O geobr põe na sede do município todo estabelecimento do CNES cuja coordenada não confere. Em JF, 1.621 dos 2.096 registros estão nesse ponto, a 1 km da estação central, e inflariam o trecho do centro. No CNEFE, só 3 dos 307.905 endereços de JF não têm a coordenada do endereço ou da face de quadra.
+- **Recortes fixos para a exposição.** Os originais (setores de Minas, escolas do Brasil) passam de 280 MB e não mudam. O repositório guarda o recorte de JF em `ingest/exposicao_jf/`, e `uv run python ingest/ingest_exposicao_jf.py --baixar` o refaz. Um teste exige que os setores somem os 540.756 moradores do Censo. Do CNEFE entram só a espécie e a coordenada, sem endereço nem nome de estabelecimento.
+- **Faixa de ponta reta.** Cada lugar deve contar para o trecho em frente a ele. Com a ponta reta, a soma dos trechos passa a faixa da linha inteira em 3,5% (curvas); com a ponta redonda, o teste de dupla contagem falha.
 - **Notebooks só leem os marts.** Nenhuma regra de limpeza mora nos notebooks, então o número deles é o mesmo do painel.
 
 ## Achado de qualidade de dados
@@ -166,6 +176,9 @@ Outros alvos: `make ingest`, `make acidentes`, `make transform`, `make export`, 
 - Produção origem-destino: [ANTT, SIADE](https://dados.antt.gov.br/dataset/sistema-de-acompanhamento-do-desempenho-operacional-das-concessionarias-siade)
 - Acidentes ferroviários e índice de acidentes: [ANTT, RAAF](https://dados.antt.gov.br/dataset/relatorio-de-acompanhamento-de-acidentes-ferroviarios-raaf)
 - Exportação por UF, porto e mercadoria: [Comex Stat, MDIC](https://comexstat.mdic.gov.br/) (API `api-comexstat.mdic.gov.br`)
+- População por setor censitário: [IBGE, Censo 2022, malha com atributos](https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/malha_com_atributos/)
+- Endereços não residenciais: [IBGE, CNEFE 2022](https://ftp.ibge.gov.br/Cadastro_Nacional_de_Enderecos_para_Fins_Estatisticos/Censo_Demografico_2022/)
+- Escolas: INEP, Censo Escolar 2023, geocodificadas pelo IPEA no [geobr](https://ipeagit.github.io/geobr/)
 - Traçado da linha em Juiz de Fora e ruas que o cruzam: © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, licença ODbL
 - Pátios ferroviários: [InfraSA](https://geo.infrasa.gov.br/server/rest/services/P%C3%A1tio_Ferrovi%C3%A1rio/MapServer)
 - Mapa base: © [CARTO](https://carto.com/), © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors

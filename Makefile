@@ -1,4 +1,4 @@
-.PHONY: up ingest patios producao comex acidentes osm transform export docs site analise pipeline down
+.PHONY: up ingest patios producao comex acidentes osm exposicao transform export docs site analise pipeline down
 
 # As etapas dependem uma da outra pela ordem, não por arquivos: com make -j o
 # transform rodaria antes de a ingestão terminar.
@@ -23,7 +23,11 @@ acidentes:
 osm:
 	uv run python ingest/ingest_osm_jf.py
 
-ingest: patios producao comex acidentes osm
+# Recortes fixos de JF; para refazer: uv run python ingest/ingest_exposicao_jf.py --baixar
+exposicao:
+	uv run python ingest/ingest_exposicao_jf.py
+
+ingest: patios producao comex acidentes osm exposicao
 
 transform:
 	cd dbt_ferrovias && uv run dbt deps --profiles-dir . && uv run dbt build --profiles-dir .

@@ -36,3 +36,14 @@ sources:
           (© colaboradores do OpenStreetMap, ODbL).
       - name: osm_jf_copia
         description: O arquivo da cópia do OSM que está carregado.
+  - name: exposicao
+    schema: raw
+    tables:
+      - name: setores_jf
+        description: Setores censitários de Juiz de Fora com o total de pessoas (IBGE, Censo 2022, malha com atributos, v0001).
+      - name: escolas_jf
+        description: Escolas em funcionamento em Juiz de Fora (INEP, Censo Escolar 2023, geocodificadas pelo IPEA no geobr).
+      - name: enderecos_jf
+        description: >
+          Endereços não residenciais de Juiz de Fora no CNEFE 2022 (IBGE): ensino,
+          saúde, comércio e serviço, religioso. Só a espécie e a coordenada.

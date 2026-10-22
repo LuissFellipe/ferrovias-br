@@ -35,3 +35,8 @@ models:
     columns:
       - name: acidente_id
         tests: [unique, not_null]
+  - name: int_trechos_jf
+    description: Trechos de 1 km do km oficial em Juiz de Fora, desenhados sobre o traçado com a mesma interpolação dos acidentes (macro km_no_tracado_jf).
+    columns:
+      - name: trecho_km
+        tests: [unique, not_null]

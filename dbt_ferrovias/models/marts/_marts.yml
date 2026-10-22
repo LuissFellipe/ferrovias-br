@@ -97,3 +97,18 @@ models:
           - relationships: {to: ref('fct_acidentes'), field: acidente_id}
       - name: vao_entre_ancoras_km
         description: Distância entre as duas estações de referência que cercam o acidente. Quanto maior, maior o erro de posição (30 m com 6 km; 1,2 km com 24 km).
+
+  - name: fct_trechos_jf
+    description: >
+      Trechos de 1 km da Linha do Centro em Juiz de Fora, com acidentes de
+      2011 a 2025 e a exposição a até 500 m: pessoas (Censo 2022, ponderada
+      pela área do setor), escolas (INEP 2023), endereços de comércio e
+      serviço e de saúde (CNEFE 2022) e travessias mapeadas no OSM.
+    columns:
+      - name: trecho_km
+        description: Primeiro km do trecho, pelo km oficial da ANTT.
+        tests: [unique, not_null]
+      - name: pessoas_esquerda
+        description: Pessoas a até 500 m à esquerda da linha, no sentido do km crescente.
+      - name: pessoas_direita
+        description: Pessoas a até 500 m à direita da linha, no sentido do km crescente.
